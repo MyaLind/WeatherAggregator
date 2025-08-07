@@ -1,0 +1,43 @@
+{
+  "name": "confidential-weather-aggregator",
+  "version": "1.0.0",
+  "description": "A privacy-preserving weather data aggregator using FHE encryption",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "next": "^14.0.4",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "ethers": "^5.7.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.6",
+    "@types/react": "^18.2.46",
+    "@types/react-dom": "^18.2.18",
+    "typescript": "^5.3.3",
+    "eslint": "^8.56.0",
+    "eslint-config-next": "^14.0.4"
+  },
+  "keywords": [
+    "fhevm",
+    "weather",
+    "privacy",
+    "encryption",
+    "blockchain",
+    "nextjs",
+    "react"
+  ],
+  "author": "Weather Aggregator Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/MyaLind/WeatherAggregator.git"
+  },
+  "homepage": "https://myalind.github.io/WeatherAggregator/"
+}
