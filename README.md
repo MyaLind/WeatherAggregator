@@ -4,9 +4,9 @@ A privacy-preserving weather data aggregator using FHE (Fully Homomorphic Encryp
 
 ## 🌐 Live Demo
 
-- **Live Application**: [https://myalind.github.io/WeatherAggregator/](https://myalind.github.io/WeatherAggregator/)
+- **Live Application**: [https://weather-aggregator.vercel.app/](https://weather-aggregator.vercel.app/)
 - **GitHub Repository**: [https://github.com/MyaLind/WeatherAggregator](https://github.com/MyaLind/WeatherAggregator)
-- **Video Demo**: [`demo.mp4`](demo.mp4) - Download and watch the video demonstration of the application
+- **Video Demo**: [`demo.mp4`] - Download and watch the video demonstration of the application
 
 ## 🎥 Video Demonstration
 
@@ -182,7 +182,7 @@ MIT License - see LICENSE file for details
 
 ## Links
 
-- **Live Demo**: [https://myalind.github.io/WeatherAggregator/](https://myalind.github.io/WeatherAggregator/)
+- **Live Demo**: [https://weather-aggregator.vercel.app/](https://weather-aggregator.vercel.app/)
 - **GitHub Repository**: [https://github.com/MyaLind/WeatherAggregator](https://github.com/MyaLind/WeatherAggregator)
 - **Smart Contract**: [0x291B77969Bb18710609C35d263adCb0848a3f82F](https://sepolia.etherscan.io/address/0x291B77969Bb18710609C35d263adCb0848a3f82F)
 
@@ -191,7 +191,7 @@ MIT License - see LICENSE file for details
 For technical support or questions:
 - Review the documentation
 - Check existing issues on [GitHub](https://github.com/MyaLind/WeatherAggregator/issues)
-- Visit the [live application](https://myalind.github.io/WeatherAggregator/)
+- Visit the [live application](https://weather-aggregator.vercel.app/)
 
 ---
 
