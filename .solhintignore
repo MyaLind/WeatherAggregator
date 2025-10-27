@@ -1,0 +1,12 @@
+# Directories
+node_modules/
+artifacts/
+cache/
+coverage/
+dist/
+build/
+.next/
+
+# Files
+*.backup
+*.sol.backup
