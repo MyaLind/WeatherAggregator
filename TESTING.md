@@ -1,21 +1,34 @@
 # 🧪 Testing Guide for Confidential Weather Aggregator
 
-This document provides comprehensive testing instructions for the Confidential Weather Aggregator smart contract.
+Comprehensive testing documentation for the Confidential Weather Aggregator smart contracts.
+
+## 📊 Test Suite Overview
+
+### Test Statistics
+
+| Metric | Count |
+|--------|-------|
+| **Total Test Cases** | 50+ |
+| **Test Categories** | 14 |
+| **Code Coverage Target** | >90% |
+| **Testing Framework** | Hardhat + Mocha + Chai |
+
+---
 
 ## 📋 Table of Contents
 
 - [Test Overview](#test-overview)
 - [Running Tests](#running-tests)
 - [Test Coverage](#test-coverage)
-- [Test Scenarios](#test-scenarios)
-- [Manual Testing](#manual-testing)
+- [Test Categories](#test-categories)
+- [Testing Best Practices](#testing-best-practices)
 - [Troubleshooting](#troubleshooting)
 
 ---
 
 ## 🎯 Test Overview
 
-The test suite covers all major functionality of the `ConfidentialWeatherAggregator` smart contract:
+The test suite provides comprehensive coverage of all `ConfidentialWeatherAggregator` smart contract functionality with **50+ test cases** across **14 categories**.
 
 ### Test Categories
 
@@ -30,42 +43,70 @@ The test suite covers all major functionality of the `ConfidentialWeatherAggrega
    - Validation checks
    - Multi-station registration
 
-3. **Station Management Tests** (4 tests)
-   - Deactivation
+3. **Station Deactivation Tests** (4 tests)
+   - Deactivation functionality
    - Access control
    - State changes
+   - Active count updates
 
-4. **Time Window Tests** (3 tests)
+4. **Time Window Management Tests** (3 tests)
    - Toggle functionality
    - Access control
    - State effects
 
-5. **Data Submission Tests** (5 tests)
+5. **Weather Data Submission Tests** (5 tests)
    - Encrypted data submission
    - Access control
    - Double submission prevention
    - Status tracking
 
-6. **Forecast Generation Tests** (4 tests)
+6. **Regional Forecast Generation Tests** (4 tests)
    - Minimum station requirements
    - Forecast creation
    - Duplicate prevention
    - Data retrieval
 
-7. **Current State Tests** (2 tests)
+7. **Current Forecast Info Tests** (2 tests)
    - Forecast info retrieval
    - Station count tracking
 
-8. **Access Control Tests** (3 tests)
+8. **Access Control Tests** (1 test)
    - Owner-only functions
    - Permission validation
 
-9. **Edge Cases Tests** (3 tests)
+9. **Edge Cases Tests** (6 tests)
    - Maximum values
    - Minimum values
    - Time calculations
+   - Boundary conditions
+   - Invalid IDs
 
-**Total Test Cases: 33+**
+10. **Gas Optimization Tests** (3 tests)
+    - Station registration efficiency
+    - Data submission efficiency
+    - Forecast generation efficiency
+
+11. **Multi-Station Scenarios Tests** (3 tests)
+    - Maximum station registration
+    - Multi-station submission tracking
+    - Active/inactive counting
+
+12. **Time Window Restrictions Tests** (2 tests)
+    - Window toggle functionality
+    - Event emission
+
+13. **Forecast History Tests** (3 tests)
+    - Forecast count maintenance
+    - Timestamp storage
+    - Participating station tracking
+
+14. **View Functions Tests** (4 tests)
+    - Owner query
+    - Station count query
+    - Forecast count query
+    - Time window status query
+
+**Total Test Cases: 50+**
 
 ---
 
