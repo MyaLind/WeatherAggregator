@@ -13,7 +13,7 @@ The Confidential Weather Aggregator enables multiple weather stations to submit 
 
 **Live Application**: [https://weather-aggregator.vercel.app/](https://weather-aggregator.vercel.app/)
 
-**Repository**: [https://github.com/MyaLind/FHEWeatherAggregator](https://github.com/MyaLind/FHEWeatherAggregator)
+
 
 ## 📹 Demo Video
 
