@@ -323,5 +323,194 @@ describe("ConfidentialWeatherAggregator", function () {
       const currentHour = await weatherAggregator.getCurrentHour();
       expect(currentHour).to.be.at.least(0).and.at.most(23);
     });
+
+    it("Should handle station ID boundary - valid station", async function () {
+      const stationInfo = await weatherAggregator.getStationInfo(0);
+      expect(stationInfo.stationAddress).to.equal(station1.address);
+    });
+
+    it("Should reject invalid station ID when checking submission", async function () {
+      await expect(
+        weatherAggregator.hasStationSubmitted(999)
+      ).to.be.reverted;
+    });
+
+    it("Should reject invalid forecast ID retrieval", async function () {
+      await expect(
+        weatherAggregator.getRegionalForecast(999)
+      ).to.be.reverted;
+    });
+  });
+
+  describe("Gas Optimization", function () {
+    beforeEach(async function () {
+      await weatherAggregator.registerStation(station1.address, "Tokyo");
+      await weatherAggregator.registerStation(station2.address, "Seoul");
+      await weatherAggregator.registerStation(station3.address, "Beijing");
+      await weatherAggregator.setTimeWindowEnabled(false);
+    });
+
+    it("Should register station efficiently", async function () {
+      const tx = await weatherAggregator.registerStation(user.address, "Shanghai");
+      const receipt = await tx.wait();
+
+      expect(receipt.gasUsed).to.be.lt(200000); // Less than 200k gas
+    });
+
+    it("Should submit weather data efficiently", async function () {
+      const tx = await weatherAggregator.connect(station1).submitWeatherData(2250, 6500, 10130, 15);
+      const receipt = await tx.wait();
+
+      expect(receipt.gasUsed).to.be.lt(500000); // Less than 500k gas
+    });
+
+    it("Should generate forecast efficiently with 3 stations", async function () {
+      await weatherAggregator.connect(station1).submitWeatherData(2250, 6500, 10130, 15);
+      await weatherAggregator.connect(station2).submitWeatherData(1830, 7250, 10200, 12);
+      await weatherAggregator.connect(station3).submitWeatherData(2010, 5870, 10050, 18);
+
+      const tx = await weatherAggregator.generateRegionalForecast();
+      const receipt = await tx.wait();
+
+      expect(receipt.gasUsed).to.be.lt(1000000); // Less than 1M gas
+    });
+  });
+
+  describe("Multi-Station Scenarios", function () {
+    beforeEach(async function () {
+      await weatherAggregator.setTimeWindowEnabled(false);
+    });
+
+    it("Should handle registration of maximum stations", async function () {
+      const additionalSigners = await ethers.getSigners();
+
+      for (let i = 0; i < 10; i++) {
+        await weatherAggregator.registerStation(
+          additionalSigners[i].address,
+          `Station ${i}`
+        );
+      }
+
+      expect(await weatherAggregator.stationCount()).to.equal(10);
+      expect(await weatherAggregator.getActiveStationCount()).to.equal(10);
+    });
+
+    it("Should track submissions from multiple stations correctly", async function () {
+      await weatherAggregator.registerStation(station1.address, "Tokyo");
+      await weatherAggregator.registerStation(station2.address, "Seoul");
+      await weatherAggregator.registerStation(station3.address, "Beijing");
+
+      await weatherAggregator.connect(station1).submitWeatherData(2250, 6500, 10130, 15);
+      await weatherAggregator.connect(station2).submitWeatherData(1830, 7250, 10200, 12);
+
+      const info = await weatherAggregator.getCurrentForecastInfo();
+      expect(info.submittedStations).to.equal(2);
+    });
+
+    it("Should correctly count active vs inactive stations", async function () {
+      await weatherAggregator.registerStation(station1.address, "Tokyo");
+      await weatherAggregator.registerStation(station2.address, "Seoul");
+      await weatherAggregator.registerStation(station3.address, "Beijing");
+
+      expect(await weatherAggregator.getActiveStationCount()).to.equal(3);
+
+      await weatherAggregator.deactivateStation(0);
+      expect(await weatherAggregator.getActiveStationCount()).to.equal(2);
+
+      await weatherAggregator.deactivateStation(1);
+      expect(await weatherAggregator.getActiveStationCount()).to.equal(1);
+    });
+  });
+
+  describe("Time Window Restrictions", function () {
+    beforeEach(async function () {
+      await weatherAggregator.registerStation(station1.address, "Tokyo");
+    });
+
+    it("Should toggle time window on and off", async function () {
+      expect(await weatherAggregator.timeWindowEnabled()).to.equal(true);
+
+      await weatherAggregator.setTimeWindowEnabled(false);
+      expect(await weatherAggregator.timeWindowEnabled()).to.equal(false);
+
+      await weatherAggregator.setTimeWindowEnabled(true);
+      expect(await weatherAggregator.timeWindowEnabled()).to.equal(true);
+    });
+
+    it("Should emit TimeWindowToggled event with correct value", async function () {
+      await expect(weatherAggregator.setTimeWindowEnabled(false))
+        .to.emit(weatherAggregator, "TimeWindowToggled")
+        .withArgs(false);
+
+      await expect(weatherAggregator.setTimeWindowEnabled(true))
+        .to.emit(weatherAggregator, "TimeWindowToggled")
+        .withArgs(true);
+    });
+  });
+
+  describe("Forecast History", function () {
+    beforeEach(async function () {
+      await weatherAggregator.registerStation(station1.address, "Tokyo");
+      await weatherAggregator.registerStation(station2.address, "Seoul");
+      await weatherAggregator.registerStation(station3.address, "Beijing");
+      await weatherAggregator.setTimeWindowEnabled(false);
+    });
+
+    it("Should maintain forecast count correctly", async function () {
+      expect(await weatherAggregator.forecastCount()).to.equal(0);
+
+      await weatherAggregator.connect(station1).submitWeatherData(2250, 6500, 10130, 15);
+      await weatherAggregator.connect(station2).submitWeatherData(1830, 7250, 10200, 12);
+      await weatherAggregator.connect(station3).submitWeatherData(2010, 5870, 10050, 18);
+      await weatherAggregator.generateRegionalForecast();
+
+      expect(await weatherAggregator.forecastCount()).to.equal(1);
+    });
+
+    it("Should store forecast timestamp correctly", async function () {
+      await weatherAggregator.connect(station1).submitWeatherData(2250, 6500, 10130, 15);
+      await weatherAggregator.connect(station2).submitWeatherData(1830, 7250, 10200, 12);
+      await weatherAggregator.connect(station3).submitWeatherData(2010, 5870, 10050, 18);
+
+      const blockBefore = await ethers.provider.getBlock('latest');
+      await weatherAggregator.generateRegionalForecast();
+
+      const forecast = await weatherAggregator.getRegionalForecast(0);
+      expect(forecast.timestamp).to.be.at.least(blockBefore.timestamp);
+    });
+
+    it("Should track participating stations in forecast", async function () {
+      await weatherAggregator.connect(station1).submitWeatherData(2250, 6500, 10130, 15);
+      await weatherAggregator.connect(station2).submitWeatherData(1830, 7250, 10200, 12);
+      await weatherAggregator.connect(station3).submitWeatherData(2010, 5870, 10050, 18);
+
+      await weatherAggregator.generateRegionalForecast();
+
+      const forecast = await weatherAggregator.getRegionalForecast(0);
+      expect(forecast.participatingStations).to.equal(3);
+      expect(forecast.isGenerated).to.equal(true);
+    });
+  });
+
+  describe("View Functions", function () {
+    it("Should return correct owner address", async function () {
+      const ownerAddress = await weatherAggregator.owner();
+      expect(ownerAddress).to.equal(owner.address);
+    });
+
+    it("Should return correct station count", async function () {
+      expect(await weatherAggregator.stationCount()).to.equal(0);
+
+      await weatherAggregator.registerStation(station1.address, "Tokyo");
+      expect(await weatherAggregator.stationCount()).to.equal(1);
+    });
+
+    it("Should return correct forecast count", async function () {
+      expect(await weatherAggregator.forecastCount()).to.equal(0);
+    });
+
+    it("Should return correct time window status", async function () {
+      expect(await weatherAggregator.timeWindowEnabled()).to.equal(true);
+    });
   });
 });
