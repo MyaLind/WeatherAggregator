@@ -77,25 +77,203 @@ Aggregate encrypted meteorological data from multiple weather stations into accu
 
 ## 🏗️ Architecture
 
+### 🎯 Two Implementation Options
+
+This project provides **two frontend implementations** for different use cases:
+
+#### ⭐ Option 1: React Application (weather-aggregator/) - **RECOMMENDED**
+
+**Best for:** New development, modern React projects, integrated contract development
+
+**Location:** `weather-aggregator/` directory
+
+**Key Features:**
+- ✅ All-in-one solution (frontend + contracts in one directory)
+- ✅ Modern React 18.2 with concurrent rendering
+- ✅ Full TypeScript support across frontend and contracts
+- ✅ Integrated Hardhat for seamless development workflow
+- ✅ Client-side FHE encryption with FHEVM SDK + fhevmjs
+- ✅ Component-based architecture with 7 modular components
+- ✅ Custom React hooks for clean state management
+- ✅ Zero-config build system with React Scripts
+
+**Quick Start:**
+```bash
+cd weather-aggregator
+npm install
+npm run compile:contracts
+npm run dev
+```
+
+#### Option 2: Next.js Application (Root Directory) - Legacy
+
+**Best for:** Existing deployments, backward compatibility
+
+**Location:** Root directory
+
+**Status:** Maintained for backward compatibility only. New development should use the React app.
+
+---
+
 ### System Overview
 
 ```
-Frontend (Next.js + React)
-├── Client-side FHE encryption
-├── MetaMask wallet integration
-├── Real-time encrypted data display
-└── Responsive UI components
+Frontend Applications
+├── React Application (weather-aggregator/) ⭐ RECOMMENDED FOR NEW DEVELOPMENT
+│   ├── Core Framework
+│   │   ├── React 18.2 + TypeScript 5.3 (Modern UI with hooks & concurrent features)
+│   │   ├── React Scripts 5.0.1 (Zero-config Create React App build system)
+│   │   └── Hot Module Replacement (Instant feedback during development)
+│   │
+│   ├── Blockchain Integration
+│   │   ├── Ethers.js 6.15.0 (Ethereum blockchain interaction)
+│   │   ├── FHEVM SDK (Local package) (Client-side FHE encryption)
+│   │   ├── fhevmjs 0.6.2 (Core FHE encryption library)
+│   │   └── MetaMask integration (Wallet connection & transaction signing)
+│   │
+│   ├── Smart Contract Development
+│   │   ├── Integrated Hardhat 2.22.16 (Contract compilation & deployment)
+│   │   ├── Solidity 0.8.24 contracts in contracts/ directory
+│   │   └── Deployment scripts in scripts/ directory
+│   │
+│   ├── UI Component Architecture (7 Components)
+│   │   ├── WalletConnection.tsx (MetaMask wallet management)
+│   │   ├── ContractInfo.tsx (System status & contract information)
+│   │   ├── StationRegistration.tsx (Owner: Register weather stations)
+│   │   ├── WeatherDataSubmission.tsx (Stations: Submit encrypted data)
+│   │   ├── StationsList.tsx (Public: View active stations)
+│   │   ├── ForecastGeneration.tsx (Public: Generate forecasts)
+│   │   └── ForecastHistory.tsx (Public: View historical forecasts)
+│   │
+│   ├── Custom React Hooks (State Management)
+│   │   ├── useWallet.ts (Wallet connection state & account management)
+│   │   └── useContract.ts (Contract instance & interaction logic)
+│   │
+│   └── Utility Layer
+│       ├── src/utils/contract.ts (Contract ABIs & helper functions)
+│       └── src/utils/theme.ts (UI theme configuration)
+│
+└── Next.js Application (Root Directory - Legacy)
+    ├── Next.js 14 + React 18 (Server-side rendering framework)
+    ├── TypeScript 5.3.3 (Type safety)
+    └── ⚠️ Maintained for backward compatibility only
 
-Smart Contract (Solidity 0.8.24)
-├── Encrypted storage (euint32, euint8)
-├── Homomorphic aggregation operations
-├── Role-based access control
-└── Time window management
+Smart Contract Layer (Solidity 0.8.24)
+├── ConfidentialWeatherAggregator.sol
+│   ├── Encrypted storage (euint32, euint8)
+│   ├── Homomorphic aggregation operations (FHE.add)
+│   ├── Role-based access control (Owner, Stations, Public)
+│   ├── Time window management (Submission & Generation periods)
+│   └── Gateway callback integration (processForecastResult)
+├── Dependencies
+│   ├── @fhevm/solidity ^0.8.0 (FHE operations)
+│   └── @zama-fhe/oracle-solidity ^0.2.0 (Oracle integration)
 
-Zama FHEVM
+Zama FHEVM Infrastructure
 ├── Fully Homomorphic Encryption layer
+│   ├── euint32 type (32-bit encrypted unsigned integers)
+│   ├── euint8 type (8-bit encrypted unsigned integers)
+│   └── FHE operations (add, decrypt request)
 ├── Gateway decryption service
-└── Sepolia testnet deployment
+│   ├── Address: 0x33347831500F1E73F0CccBBe71C7E21Ca0100a42
+│   └── Callback mechanism for async decryption
+└── Sepolia testnet deployment (Chain ID: 11155111)
+```
+
+### Development Workflow
+
+#### ⭐ Recommended: React Application Workflow
+
+The React application provides a streamlined, all-in-one development experience:
+
+```
+Developer Journey with React App (weather-aggregator/)
+│
+├─── 1. Initial Setup
+│    ├──> cd weather-aggregator/
+│    ├──> npm install                      # Install all dependencies
+│    └──> cp .env.example .env             # Configure environment
+│
+├─── 2. Smart Contract Development
+│    ├──> npm run compile:contracts        # Compile Solidity contracts
+│    ├──> npm run deploy:contracts         # Deploy to Sepolia testnet
+│    └──> Update contract address in src/utils/contract.ts
+│
+├─── 3. Frontend Development
+│    ├──> npm run dev                      # Start React dev server (port 3000)
+│    ├──> Edit components in src/components/
+│    ├──> Edit hooks in src/hooks/
+│    └──> Hot reload automatically applies changes
+│
+├─── 4. Testing & Quality
+│    ├──> npm test                         # Run React component tests
+│    └──> npm run build                    # Test production build
+│
+└─── 5. Deployment
+     ├──> npm run build                    # Create production build
+     └──> Deploy build/ directory to hosting (Vercel, Netlify, etc.)
+
+Key Benefits of This Workflow:
+✅ Single directory for all development
+✅ No switching between frontend and contract directories
+✅ Integrated tooling with consistent commands
+✅ Hot reload for instant feedback
+✅ TypeScript across entire stack
+```
+
+#### React App Component Architecture
+
+```
+Component Hierarchy & Data Flow:
+
+App.tsx (Root Component)
+├── State Management via Custom Hooks
+│   ├── useWallet() - Wallet connection & account state
+│   └── useContract() - Contract instance & interactions
+│
+├── WalletConnection.tsx
+│   └── Handles MetaMask connection & network switching
+│
+├── ContractInfo.tsx
+│   └── Displays contract address, owner, system status
+│
+├── Owner-Only Components (conditional rendering)
+│   └── StationRegistration.tsx
+│       └── Register new weather stations
+│
+├── Station-Only Components (conditional rendering)
+│   └── WeatherDataSubmission.tsx
+│       └── Submit encrypted weather data with FHE
+│
+├── Public Components
+│   ├── StationsList.tsx
+│   │   └── View all registered stations & their status
+│   │
+│   ├── ForecastGeneration.tsx
+│   │   └── Trigger regional forecast generation
+│   │
+│   └── ForecastHistory.tsx
+│       └── View historical forecasts with aggregated data
+│
+└── Utility Layer
+    ├── src/utils/contract.ts - Contract ABIs & helper functions
+    └── src/utils/theme.ts - UI styling constants
+```
+
+#### Legacy Next.js Workflow (Not Recommended)
+
+```
+Developer (Legacy Path - Backward Compatibility Only)
+│
+└──> Root Directory
+     │
+     ├──> npm install --legacy-peer-deps   # Install with peer deps
+     ├──> npm run compile                  # Compile contracts
+     ├──> npm run deploy:sepolia           # Deploy contracts
+     └──> npm run dev                      # Start Next.js server
+
+⚠️  This workflow is maintained only for existing deployments.
+    New development should use the React app workflow above.
 ```
 
 ### FHE Workflow
@@ -167,15 +345,57 @@ ConfidentialWeatherAggregator
 
 ### Smart Contracts
 - **Solidity**: 0.8.24 (Cancun EVM)
-- **FHEVM**: `@fhevm/solidity` - Zama's FHE library
-- **Hardhat**: 2.22.16 - Development framework
-- **Gas Optimization**: 800 runs with Yul optimization
+- **FHEVM**: `@fhevm/solidity ^0.8.0` - Zama's FHE library for encrypted computation
+- **Zama Oracle**: `@zama-fhe/oracle-solidity ^0.2.0` - Oracle integration for decryption
+- **Hardhat**: 2.22.16 - Development framework with TypeScript support
+- **Gas Optimization**: 800 runs with Yul optimization for production efficiency
 
-### Frontend
-- **Next.js**: 14.0.4 - React framework
+### Frontend Applications
+
+#### React Application (weather-aggregator/) - **⭐ RECOMMENDED FOR NEW DEVELOPMENT**
+
+**Core Framework:**
+- **React**: 18.2.0 - Modern UI library with hooks and concurrent rendering
+- **TypeScript**: 5.3.0 - Full type safety and IntelliSense support
+- **React Scripts**: 5.0.1 - Zero-config Create React App build system
+
+**Blockchain Integration:**
+- **Ethers.js**: 6.15.0 - Ethereum blockchain interaction and contract management
+- **FHEVM SDK**: Local package (`file:../../packages/fhevm-sdk`) - Client-side FHE encryption
+- **fhevmjs**: 0.6.2 - Core FHE encryption library for data privacy
+
+**Development Tools:**
+- **Hardhat**: 2.22.16 - Integrated smart contract compilation and deployment
+- **dotenv**: 17.2.3 - Environment configuration management
+- **@nomicfoundation/hardhat-ethers**: 3.1.0 - Hardhat-Ethers integration
+
+**Component Architecture** (Modular design for better maintainability):
+- **WalletConnection.tsx** - MetaMask wallet connection and state management
+- **StationRegistration.tsx** - Weather station registration interface
+- **WeatherDataSubmission.tsx** - Encrypted weather data submission forms
+- **ForecastGeneration.tsx** - Regional forecast generation UI
+- **ForecastHistory.tsx** - Historical forecast data visualization
+- **StationsList.tsx** - Active station monitoring and status
+- **ContractInfo.tsx** - System status and contract information display
+
+**Custom React Hooks:**
+- **useWallet.ts** - Wallet connection state and management logic
+- **useContract.ts** - Smart contract interaction and event handling
+
+**Key Advantages:**
+- ✅ Modern React 18.2 architecture with concurrent features
+- ✅ Integrated Hardhat for seamless contract development workflow
+- ✅ Client-side FHE encryption before blockchain submission
+- ✅ Component-based architecture for easy maintenance and extension
+- ✅ TypeScript throughout for type safety
+- ✅ Zero-config build system with React Scripts
+
+#### Next.js Application (Root Directory - Legacy)
+- **Next.js**: 14.0.4 - Server-side React framework
 - **React**: 18.2.0 - UI library
 - **TypeScript**: 5.3.3 - Type safety
 - **Ethers.js**: 6.15.0 - Ethereum interaction
+- **Note**: Maintained for backward compatibility. The React app (weather-aggregator/) is recommended for all new development
 
 ### Development Tools
 - **Testing**: Mocha + Chai (50+ test cases)
@@ -203,12 +423,66 @@ ConfidentialWeatherAggregator
 
 ### Installation
 
+#### ⭐ Option 1: React Application (RECOMMENDED)
+
+The React application in `weather-aggregator/` directory is the **recommended approach** for development. It provides a modern, component-based frontend with integrated smart contract development in a single, cohesive package.
+
+```bash
+# 1. Clone repository
+git clone https://github.com/MyaLind/WeatherAggregator.git
+cd WeatherAggregator/weather-aggregator
+
+# 2. Install dependencies
+npm install
+
+# 3. Set up environment variables
+cp .env.example .env
+# Edit .env with your configuration:
+# - SEPOLIA_RPC_URL: Your Infura/Alchemy Sepolia endpoint
+# - PRIVATE_KEY: Your wallet private key (without 0x prefix)
+# - Contract addresses and Gateway configuration
+
+# 4. Compile smart contracts
+npm run compile:contracts
+
+# 5. (Optional) Deploy your own contract instance
+npm run deploy:contracts
+
+# 6. Start development server
+npm run dev
+```
+
+**Why choose the React app? (Key Benefits)**
+- ✅ **All-in-One Solution**: Frontend + Smart Contracts in one directory
+- ✅ **Modern React 18.2**: Concurrent rendering and latest React features
+- ✅ **Integrated Hardhat**: Seamless contract compilation and deployment workflow
+- ✅ **Full TypeScript Support**: Complete type safety across frontend and contracts
+- ✅ **Client-Side FHE Encryption**: FHEVM SDK + fhevmjs for data privacy
+- ✅ **Component-Based Architecture**: 7 modular, reusable UI components
+- ✅ **Custom React Hooks**: Simplified wallet and contract state management
+- ✅ **Zero-Config Build**: React Scripts handles all build configuration
+- ✅ **Easier Maintenance**: Single codebase for frontend and blockchain logic
+
+**React App Structure:**
+```
+weather-aggregator/
+├── src/components/          # 7 UI components (WalletConnection, etc.)
+├── src/hooks/              # Custom React hooks for state management
+├── contracts/              # Solidity smart contracts
+├── scripts/                # Deployment scripts
+└── hardhat.config.js       # Contract compilation configuration
+```
+
+#### Option 2: Root Directory Setup (Legacy Next.js - Not Recommended)
+
+⚠️ **Note**: This setup is maintained only for backward compatibility. New development should use the React app above.
+
 ```bash
 # Clone repository
 git clone https://github.com/MyaLind/WeatherAggregator.git
 cd WeatherAggregator
 
-# Install dependencies
+# Install dependencies (requires legacy peer deps flag)
 npm install --legacy-peer-deps
 
 # Set up environment
@@ -279,15 +553,73 @@ npm run simulate
 
 ### Run Frontend
 
+#### ⭐ React Application (RECOMMENDED)
+
+The React application provides the best development experience with integrated contract development, modern UI components, and client-side FHE encryption.
+
 ```bash
+# Navigate to React app directory
+cd weather-aggregator
+
+# Install dependencies (if not already installed)
+npm install
+
+# Compile smart contracts (required before first run)
+npm run compile:contracts
+
 # Start development server
 npm run dev
+# Application will be available at http://localhost:3000
 
-# Build for production
+# Build for production deployment
 npm run build
 
-# Start production server
-npm run start
+# Run React tests
+npm test
+```
+
+**🎯 React App Features & Capabilities:**
+
+*Frontend Features:*
+- ✅ **Modern React 18.2** with concurrent rendering and automatic batching
+- ✅ **Full TypeScript Support** for type-safe development
+- ✅ **Component-Based Architecture** with 7 modular, reusable components
+- ✅ **Custom React Hooks** (useWallet, useContract) for clean state management
+- ✅ **Responsive Design** that works on desktop and mobile devices
+- ✅ **Real-Time Updates** with live wallet connection status
+
+*Blockchain Integration:*
+- ✅ **MetaMask Integration** with automatic network detection
+- ✅ **Client-Side FHE Encryption** using FHEVM SDK + fhevmjs 0.6.2
+- ✅ **Ethers.js v6.15.0** for robust contract interactions
+- ✅ **Event Listening** for on-chain updates and transaction confirmations
+
+*Developer Experience:*
+- ✅ **Integrated Hardhat** for seamless smart contract compilation
+- ✅ **Hot Module Replacement** for instant feedback during development
+- ✅ **Zero-Config Build** with React Scripts handling all bundling
+- ✅ **Single Codebase** for frontend and blockchain logic
+
+**Application will run on:** `http://localhost:3000`
+
+**Available npm Scripts:**
+```bash
+npm run dev                 # Start development server (port 3000)
+npm run build              # Production build with optimizations
+npm test                   # Run React component tests
+npm run compile:contracts  # Compile Solidity contracts with Hardhat
+npm run deploy:contracts   # Deploy contracts to Sepolia testnet
+```
+
+#### Next.js Application (Legacy - Not Recommended for New Development)
+
+⚠️ **Note**: The Next.js application is maintained only for backward compatibility. Use the React app for all new development.
+
+```bash
+# From root directory
+npm run dev              # Start Next.js dev server
+npm run build           # Build for production
+npm run start           # Start production server
 ```
 
 ---
@@ -858,6 +1190,89 @@ const WeatherChart = dynamic(
 
 ### Development Commands
 
+#### ⭐ React Application Commands (weather-aggregator/) - RECOMMENDED
+
+**Quick Start (Complete Setup):**
+
+```bash
+# One-time setup
+cd weather-aggregator
+npm install                    # Install all dependencies
+cp .env.example .env          # Set up environment variables
+npm run compile:contracts      # Compile Solidity contracts
+
+# Daily development
+npm run dev                    # Start React dev server (port 3000)
+```
+
+**Frontend Development Commands:**
+
+```bash
+npm run dev                    # Start React development server with hot reload
+                               # Runs on http://localhost:3000
+                               # Automatically opens in browser
+                               # Hot Module Replacement enabled
+
+npm run build                  # Create production-optimized build
+                               # Output: build/ directory
+                               # Minified, optimized, ready for deployment
+
+npm test                       # Run React component tests
+                               # Interactive watch mode
+                               # Press 'a' to run all tests
+
+npm test -- --coverage        # Run tests with coverage report
+
+npm run eject                  # Eject from Create React App
+                               # ⚠️ PERMANENT operation - not recommended
+                               # Only if you need full control over config
+```
+
+**Smart Contract Development Commands:**
+
+```bash
+npm run compile:contracts      # Compile Solidity contracts with Hardhat
+                               # Uses Hardhat 2.22.16
+                               # Output: artifacts/ directory
+                               # Creates TypeScript types
+
+npm run deploy:contracts       # Deploy contracts to Sepolia testnet
+                               # Requires .env configuration
+                               # Deploys ConfidentialWeatherAggregator
+                               # Returns deployed contract address
+```
+
+**Complete Development Workflow:**
+
+```bash
+# Full development setup (first time)
+cd weather-aggregator
+npm install
+cp .env.example .env
+# Edit .env with your Sepolia RPC URL and private key
+npm run compile:contracts
+npm run deploy:contracts
+# Update contract address in src/utils/contract.ts
+npm run dev
+
+# Daily development (after setup)
+cd weather-aggregator
+npm run dev                    # Just start and code!
+```
+
+**Available npm Scripts Summary:**
+| Command | Description | Use Case |
+|---------|-------------|----------|
+| `npm run dev` | Start dev server | Daily development |
+| `npm run build` | Production build | Before deployment |
+| `npm test` | Run tests | Testing components |
+| `npm run compile:contracts` | Compile contracts | After contract changes |
+| `npm run deploy:contracts` | Deploy to Sepolia | Initial deployment |
+
+#### Root Directory Commands (Legacy - Backward Compatibility Only)
+
+⚠️ **Note**: These commands are for the legacy Next.js application. Use the React app commands above for new development.
+
 **Code Quality & Formatting:**
 
 ```bash
@@ -1115,23 +1530,102 @@ This project includes comprehensive documentation covering all aspects of develo
 | **CI/CD** | [CI_CD_GUIDE.md](CI_CD_GUIDE.md) | CI/CD pipeline documentation |
 | **Implementation** | [IMPLEMENTATION_VERIFICATION.md](IMPLEMENTATION_VERIFICATION.md) | Feature verification report |
 
-### Configuration Files
+### Project Structure
 
 ```
-.
-├── .github/workflows/
-│   ├── ci.yml              # Complete CI/CD pipeline
-│   └── test.yml            # Test suite workflow
-├── .husky/
-│   ├── pre-commit          # Pre-commit quality checks
-│   └── pre-push            # Pre-push test execution
-├── .eslintrc.json          # ESLint configuration
-├── .prettierrc.json        # Prettier configuration
-├── .solhint.json           # Solhint configuration
-├── codecov.yml             # Codecov configuration
-├── hardhat.config.js       # Hardhat configuration
-├── tsconfig.json           # TypeScript configuration
-└── env.example             # Environment variables template
+WeatherAggregator/
+├── weather-aggregator/                     # ⭐ React Application (RECOMMENDED)
+│   │
+│   ├── src/                               # React source code
+│   │   ├── components/                    # UI Components
+│   │   │   ├── WalletConnection.tsx      # MetaMask wallet integration
+│   │   │   ├── StationRegistration.tsx   # Station management interface
+│   │   │   ├── WeatherDataSubmission.tsx # Encrypted data submission form
+│   │   │   ├── ForecastGeneration.tsx    # Forecast generation UI
+│   │   │   ├── ForecastHistory.tsx       # Historical forecasts display
+│   │   │   ├── StationsList.tsx          # Active stations monitoring
+│   │   │   └── ContractInfo.tsx          # System status & contract info
+│   │   │
+│   │   ├── hooks/                        # Custom React Hooks
+│   │   │   ├── useWallet.ts              # Wallet connection state management
+│   │   │   └── useContract.ts            # Contract interaction & event handling
+│   │   │
+│   │   ├── utils/                        # Utility Functions
+│   │   │   ├── contract.ts               # Contract helper functions
+│   │   │   └── theme.ts                  # UI theme configuration
+│   │   │
+│   │   ├── App.tsx                       # Main application component
+│   │   ├── App.css                       # Application styles
+│   │   └── index.tsx                     # React entry point
+│   │
+│   ├── contracts/                         # Solidity Smart Contracts
+│   │   └── ConfidentialWeatherAggregator.sol  # Main FHE contract
+│   │
+│   ├── scripts/                           # Deployment Scripts
+│   │   └── deploy.js                     # Hardhat deployment to Sepolia
+│   │
+│   ├── public/                            # Static Assets
+│   │   └── index.html                    # HTML template
+│   │
+│   ├── artifacts/                         # Compiled contracts (generated)
+│   ├── docs/                              # Project documentation
+│   │   ├── MIGRATION_COMPLETE.md         # Migration guide
+│   │   └── READY_TO_DEPLOY.md            # Deployment checklist
+│   │
+│   ├── hardhat.config.js                 # Hardhat configuration (Sepolia)
+│   ├── tsconfig.json                     # TypeScript configuration
+│   ├── package.json                      # Dependencies & npm scripts
+│   ├── package-lock.json                 # Dependency lock file
+│   ├── README.md                         # React app documentation
+│   ├── LICENSE                           # MIT License
+│   └── demo.mp4                          # Video demonstration
+│
+├── .github/workflows/                     # CI/CD Pipelines
+│   ├── ci.yml                            # Complete CI/CD pipeline
+│   └── test.yml                          # Test suite workflow
+│
+├── .husky/                               # Git Hooks
+│   ├── pre-commit                        # Pre-commit quality checks
+│   └── pre-push                          # Pre-push test execution
+│
+├── Configuration Files (Root Level)
+│   ├── .eslintrc.json                    # ESLint configuration
+│   ├── .prettierrc.json                  # Prettier configuration
+│   ├── .solhint.json                     # Solhint configuration
+│   ├── codecov.yml                       # Codecov configuration
+│   ├── hardhat.config.js                 # Legacy Hardhat config
+│   ├── tsconfig.json                     # Root TypeScript config
+│   └── env.example                       # Environment variables template
+│
+└── Legacy Next.js Application (Root src/)
+    ├── app/                              # Next.js app directory
+    ├── components/                       # Legacy components
+    └── (maintained for backward compatibility)
+```
+
+### Key Directories
+
+**weather-aggregator/** (Recommended for development)
+- Complete standalone React application with integrated Hardhat
+- All smart contracts, deployment scripts, and frontend code in one place
+- Optimized for modern React development with Create React App
+- Includes all necessary tooling for both frontend and blockchain development
+
+**Root Directory** (Legacy support)
+- Original Next.js application structure
+- Maintained for backward compatibility
+- Shares CI/CD and code quality configurations with React app
+
+### Configuration Files
+
+The project uses multiple configuration files for different tools and environments:
+
+- **React App**: `weather-aggregator/package.json` - React app dependencies and scripts
+- **Smart Contracts**: `weather-aggregator/hardhat.config.js` - Contract compilation settings
+- **TypeScript**: `weather-aggregator/tsconfig.json` - Type checking configuration
+- **Code Quality**: `.eslintrc.json`, `.prettierrc.json`, `.solhint.json`
+- **CI/CD**: `.github/workflows/` - Automated testing and deployment
+- **Git Hooks**: `.husky/` - Pre-commit and pre-push checks
 ```
 
 ---
@@ -1199,14 +1693,39 @@ copies or substantial portions of the Software.
 - ✅ Type-safe TypeScript implementation
 - ✅ Comprehensive documentation suite
 - ✅ Deployed on Sepolia testnet
+- ✅ Modern React 18.2 application with component-based architecture
+- ✅ Integrated FHEVM SDK for client-side encryption
 
-**Technology Stack:**
-- Hardhat 2.22.16 + Solidity 0.8.24
-- Next.js 14 + React 18 + TypeScript 5.3.3
-- Zama FHEVM + Sepolia Testnet
-- ESLint + Prettier + Solhint
-- GitHub Actions + Codecov
-- Husky + Lint-staged
+**Technology Stack Summary:**
+
+*Smart Contracts & Blockchain:*
+- **Solidity 0.8.24** (Cancun EVM with latest features)
+- **Hardhat 2.22.16** (Development framework with TypeScript support)
+- **Zama FHEVM** (`@fhevm/solidity ^0.8.0`) - Fully Homomorphic Encryption library
+- **Zama Oracle** (`@zama-fhe/oracle-solidity ^0.2.0`) - Decryption gateway integration
+- **Sepolia Testnet** (Chain ID: 11155111) - Deployed and tested
+
+*Frontend Applications:*
+- **⭐ React App (weather-aggregator/)** - RECOMMENDED FOR NEW DEVELOPMENT:
+  - **React 18.2.0** with Create React App (react-scripts 5.0.1)
+  - **TypeScript 5.3.0** for complete type safety
+  - **Ethers.js v6.15.0** for blockchain interaction
+  - **FHEVM SDK** (local package) + **fhevmjs 0.6.2** for client-side FHE encryption
+  - **Integrated Hardhat 2.22.16** for seamless contract development
+  - **Component-based architecture** with 7 modular UI components
+  - **Custom React Hooks** (useWallet, useContract) for state management
+
+- **Legacy Next.js App** (Root directory):
+  - Next.js 14.0.4 + React 18 + TypeScript 5.3.3
+  - Maintained for backward compatibility
+
+*Development Tools & Quality Assurance:*
+- **Build & Testing**: Hardhat 2.22.16 with @nomicfoundation/hardhat-ethers 3.1.0
+- **Code Quality**: ESLint + Prettier + Solhint (enforced via pre-commit hooks)
+- **CI/CD**: GitHub Actions pipelines + Codecov integration
+- **Git Hooks**: Husky + Lint-staged for quality gates
+- **Environment Management**: dotenv 17.2.3 for configuration
+- **Gas Optimization**: 800 runs with Yul optimizer enabled
 
 **Quality Metrics:**
 - Test Coverage: 80%+ target ✅
