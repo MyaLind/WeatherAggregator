@@ -15,7 +15,7 @@ Aggregate encrypted meteorological data from multiple weather stations into accu
 
 **🔗 Live Application**: [https://weather-aggregator.vercel.app/](https://weather-aggregator.vercel.app/)
 
-**📹 Video Demo**: See `demo.mp4` for a complete walkthrough of station registration, encrypted data submission, and forecast generation.
+**📹 Video Demo**: [https://youtu.be/_rW6VvNYNuw](https://youtu.be/_rW6VvNYNuw) 
 
 **📊 Deployed Contract**:
 - **Network**: Sepolia Testnet (Chain ID: 11155111)
